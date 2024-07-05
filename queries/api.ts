@@ -37,6 +37,7 @@ client.refreshToken = async (pushToken) => {
 			pushToken,
 		})
 		const token = response.data.token
+		console.log('Token refreshed', token)
 		if (!token) {
 			throw new Error('Token not found')
 		}
@@ -45,6 +46,7 @@ client.refreshToken = async (pushToken) => {
 
 		client.setToken(token)
 	} catch (error) {
+		console.log('Error refreshing token', error)
 		SecureStore.deleteItemAsync('token')
 	}
 }
@@ -65,5 +67,19 @@ client.interceptors.response.use(
 		return Promise.reject(error)
 	}
 )
+
+export function getError(error: any) {
+	console.log(error)
+	if (error?.response?.status == 429) {
+		return 'Too many requests. Please try again later.'
+	}
+	return (
+		error?.response?.data?.error ||
+		error?.message ||
+		error?.error ||
+		error ||
+		'An unknown error occurred.'
+	)
+}
 
 export default client

@@ -22,22 +22,42 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="index"
 				options={{
-					title: 'Home',
+					title: 'Channels',
 					tabBarIcon: ({ color, focused }) => (
 						<TabBarIcon
-							name={focused ? 'home' : 'home-outline'}
+							name={
+								focused
+									? 'file-tray-full'
+									: 'file-tray-full-outline'
+							}
 							color={color}
 						/>
 					),
 				}}
 			/>
 			<Tabs.Screen
-				name="explore"
+				name="messages"
 				options={{
-					title: 'Explore',
+					title: 'Messages',
 					tabBarIcon: ({ color, focused }) => (
 						<TabBarIcon
-							name={focused ? 'code-slash' : 'code-slash-outline'}
+							name={
+								focused
+									? 'chatbox-ellipses'
+									: 'chatbox-ellipses-outline'
+							}
+							color={color}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="settings"
+				options={{
+					title: 'Settings',
+					tabBarIcon: ({ color, focused }) => (
+						<TabBarIcon
+							name={focused ? 'settings' : 'settings-outline'}
 							color={color}
 						/>
 					),
