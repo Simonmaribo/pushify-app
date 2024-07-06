@@ -6,7 +6,6 @@ import {
 	SafeAreaView,
 	View,
 } from 'react-native'
-import { useSession } from '@/contexts/SessionContext'
 import PText from '@/components/elements/PText'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import getChannels from '@/queries/channels/getChannels'
@@ -106,7 +105,7 @@ export default function HomeScreen() {
 							<View
 								style={{
 									height: 1,
-									backgroundColor: Colors.dimmed,
+									backgroundColor: '#e5e5e5',
 								}}
 							/>
 						)}

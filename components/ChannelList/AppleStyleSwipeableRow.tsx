@@ -1,17 +1,33 @@
 import Colors from '@/constants/Colors'
 import { FontAwesome5 } from '@expo/vector-icons'
-import React, { Component, PropsWithChildren } from 'react'
-import { Animated, StyleSheet, Text, View, I18nManager } from 'react-native'
+import React, { ComponentProps, useRef } from 'react'
+import { Animated, Text, View, I18nManager } from 'react-native'
 
 import { RectButton, Swipeable } from 'react-native-gesture-handler'
+import PText from '../elements/PText'
+import unsubscribe from '@/queries/channels/unsubscribe'
+import { IconProps } from '@expo/vector-icons/build/createIconSet'
 
-export default class AppleStyleSwipeableRow extends Component<
-	PropsWithChildren<unknown>
-> {
-	private renderRightAction = (
-		text: string,
-		icon: string,
-		color: string,
+type Action = {
+	text: string
+	icon: ComponentProps<typeof FontAwesome5>['name']
+	color: string
+	onClick: () => void
+}
+
+type AppleStyleSwipeableRowProps = {
+	children: React.ReactNode
+	actions?: Action[]
+}
+
+export default function AppleStyleSwipeableRow({
+	children,
+	actions,
+}: AppleStyleSwipeableRowProps) {
+	const swipeableRowRef = useRef<Swipeable>(null)
+
+	const renderRightAction = (
+		action: Action,
 		x: number,
 		progress: Animated.AnimatedInterpolation<number>
 	) => {
@@ -19,28 +35,35 @@ export default class AppleStyleSwipeableRow extends Component<
 			inputRange: [0, 1],
 			outputRange: [x, 0],
 		})
-		const pressHandler = () => {
-			this.close()
-			// eslint-disable-next-line no-alert
-			window.alert(text)
+		const pressHandler = async () => {
+			close()
+			action?.onClick()
 		}
 
 		return (
 			<Animated.View
+				key={action.text}
 				style={{ flex: 1, transform: [{ translateX: trans }] }}
 			>
 				<RectButton
-					style={[styles.rightAction, { backgroundColor: color }]}
+					style={{
+						alignItems: 'center',
+						flex: 1,
+						justifyContent: 'center',
+						backgroundColor: action.color,
+					}}
 					onPress={pressHandler}
 				>
-					<FontAwesome5 name={icon} size={18} color="white" />
-					<Text style={styles.actionText}>{text}</Text>
+					<FontAwesome5 name={action.icon} size={18} color="white" />
+					<PText color="white" weight="medium">
+						{action.text}
+					</PText>
 				</RectButton>
 			</Animated.View>
 		)
 	}
 
-	private renderRightActions = (
+	const renderRightActions = (
 		progress: Animated.AnimatedInterpolation<number>,
 		_dragAnimatedValue: Animated.AnimatedInterpolation<number>
 	) => (
@@ -50,61 +73,27 @@ export default class AppleStyleSwipeableRow extends Component<
 				flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
 			}}
 		>
-			{this.renderRightAction(
-				'Delete',
-				'trash',
-				Colors.error,
-				64,
-				progress
+			{actions?.map((action, index) =>
+				renderRightAction(action, 64 * (index + 1), progress)
 			)}
 		</View>
 	)
 
-	private swipeableRow?: Swipeable
+	const close = () => {
+		swipeableRowRef.current?.close()
+	}
 
-	private updateRef = (ref: Swipeable) => {
-		this.swipeableRow = ref
-	}
-	private close = () => {
-		this.swipeableRow?.close()
-	}
-	render() {
-		const { children } = this.props
-		return (
-			<Swipeable
-				ref={this.updateRef}
-				friction={2}
-				enableTrackpadTwoFingerGesture
-				leftThreshold={30}
-				rightThreshold={40}
-				renderRightActions={this.renderRightActions}
-				onSwipeableOpen={(direction) => {
-					console.log(`Opening swipeable from the ${direction}`)
-				}}
-				onSwipeableClose={(direction) => {
-					console.log(`Closing swipeable to the ${direction}`)
-				}}
-			>
-				{children}
-			</Swipeable>
-		)
-	}
+	return (
+		<Swipeable
+			ref={swipeableRowRef}
+			friction={2}
+			enableTrackpadTwoFingerGesture
+			leftThreshold={30}
+			rightThreshold={40}
+			renderRightActions={renderRightActions}
+			key={1}
+		>
+			{children}
+		</Swipeable>
+	)
 }
-
-const styles = StyleSheet.create({
-	leftAction: {
-		flex: 1,
-		backgroundColor: '#497AFC',
-		justifyContent: 'center',
-	},
-	actionText: {
-		color: 'white',
-		fontSize: 14,
-		backgroundColor: 'transparent',
-	},
-	rightAction: {
-		alignItems: 'center',
-		flex: 1,
-		justifyContent: 'center',
-	},
-})
