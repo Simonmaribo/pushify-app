@@ -23,9 +23,6 @@ function handleRegistrationError(errorMessage: string) {
 export default function SetupPage() {
 	const router = useRouter()
 
-	const [deviceName, setDeviceName] = useState<string | null | undefined>(
-		null
-	)
 	const { setToken } = useSession()
 
 	async function askForDeviceName() {
@@ -35,8 +32,7 @@ export default function SetupPage() {
 					text: 'Continue',
 					style: 'default',
 					onPress: (value) => {
-						setDeviceName(value)
-						setupDevice()
+						setupDevice(value)
 					},
 				},
 			])
@@ -91,7 +87,7 @@ export default function SetupPage() {
 		}
 	}
 
-	async function setupDevice() {
+	async function setupDevice(deviceName?: string) {
 		const pushToken = await askForNotificationPermission()
 		if (!pushToken) return handleRegistrationError('Push token not found')
 
