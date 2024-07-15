@@ -18,6 +18,8 @@ import {
 	Poppins_900Black,
 } from '@expo-google-fonts/poppins'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import * as Notifications from 'expo-notifications'
+import NotificationListener from '@/components/NotificationListener'
 
 SplashScreen.preventAutoHideAsync()
 const queryClient = new QueryClient({
@@ -66,12 +68,21 @@ export default function RootLayout() {
 		prepare()
 	}, [isReady])
 
+	Notifications.setNotificationHandler({
+		handleNotification: async () => ({
+			shouldShowAlert: true,
+			shouldPlaySound: true,
+			shouldSetBadge: false,
+		}),
+	})
+
 	if (!isReady) {
 		return null
 	}
 
 	return (
 		<GestureHandlerRootView>
+			<NotificationListener />
 			<QueryClientProvider client={queryClient}>
 				<SessionProvider>
 					<Stack>
