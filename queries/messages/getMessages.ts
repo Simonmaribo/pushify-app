@@ -1,16 +1,17 @@
 import api, { getError } from '@/queries/api'
 
-type Channel = {
+export type Message = {
 	id: string
-	name: string
-	lastMessage: Date | null
+	title: string | null
+	message: string | null
+	channel: string
 	createdAt: Date
 }
 
-export default function getChannels(): Promise<Channel[]> {
+export default function getMessages(): Promise<Message[]> {
 	return new Promise(async (resolve, reject) => {
 		await api
-			.get(`/device/channels`)
+			.get(`/device/messages`)
 			.then((response) => resolve(response.data))
 			.catch((error) => reject(getError(error)))
 	})

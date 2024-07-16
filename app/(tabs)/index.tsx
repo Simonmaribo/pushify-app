@@ -14,6 +14,7 @@ import React, { useState } from 'react'
 import Dialog from 'react-native-dialog'
 import subscribeToChannel from '@/queries/channels/subscribeToChannel'
 import SwipeableChannelRow from '@/components/ChannelList/SwipeableChannelRow'
+import PButton from '@/components/elements/PButton'
 
 export default function HomeScreen() {
 	const [showDialog, setShowDialog] = useState(false)
@@ -89,27 +90,59 @@ export default function HomeScreen() {
 						</PText>
 						<Button title="Add channel" onPress={openDialog} />
 					</View>
-					<FlatList
-						data={data}
-						renderItem={({ item }) => (
-							<SwipeableChannelRow item={item} />
-						)}
-						keyExtractor={(item) => item.id}
-						refreshControl={
-							<RefreshControl
-								refreshing={isRefetching}
-								onRefresh={refetch}
-							/>
-						}
-						ItemSeparatorComponent={() => (
-							<View
-								style={{
-									height: 1,
-									backgroundColor: '#e5e5e5',
-								}}
-							/>
-						)}
-					/>
+					{data.length > 0 ? (
+						<FlatList
+							data={data}
+							renderItem={({ item }) => (
+								<SwipeableChannelRow item={item} />
+							)}
+							keyExtractor={(item) => item.id}
+							refreshControl={
+								<RefreshControl
+									refreshing={isRefetching}
+									onRefresh={refetch}
+								/>
+							}
+							ItemSeparatorComponent={() => (
+								<View
+									style={{
+										height: 1,
+										backgroundColor: '#e5e5e5',
+									}}
+								/>
+							)}
+						/>
+					) : (
+						<View
+							style={{
+								flex: 1,
+								justifyContent: 'center',
+								alignItems: 'center',
+								paddingHorizontal: 16,
+							}}
+						>
+							<PText size="xl" weight="medium">
+								No channels found.
+							</PText>
+							<PText
+								color={Colors.gray}
+								style={{ textAlign: 'center' }}
+							>
+								Click{' '}
+								<PText color={Colors.primary}>
+									"Add channel"
+								</PText>{' '}
+								to subscribe to a channel and start receiving
+								messages.
+							</PText>
+							<View style={{ marginTop: 24 }}>
+								<Button
+									title="Add your first channel"
+									onPress={openDialog}
+								/>
+							</View>
+						</View>
+					)}
 					<View>
 						<Dialog.Container
 							visible={showDialog}

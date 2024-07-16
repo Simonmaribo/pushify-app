@@ -9,10 +9,12 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import AppleStyleSwipeableRow from './AppleStyleSwipeableRow'
 import unsubscribe from '@/queries/channels/unsubscribe'
 import { useQueryClient } from '@tanstack/react-query'
+import { timeDifferenceShort } from '@/helpers/date'
 
 type SwipeableChannelRowProps = {
 	id: string
 	name: string
+	lastMessage: Date | null
 }
 
 export default function SwipeableChannelRow({
@@ -72,7 +74,12 @@ export default function SwipeableChannelRow({
 						{item.name}
 					</PText>
 					<PText color={'#6b7280'}>
-						Last message received 5d ago
+						{item.lastMessage
+							? `Last message received ${timeDifferenceShort(
+									new Date(),
+									item.lastMessage
+							  )} ago`
+							: 'No messages yet'}
 					</PText>
 				</View>
 			</View>
