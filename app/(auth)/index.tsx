@@ -156,21 +156,22 @@ export default function SetupPage() {
 				}}
 			>
 				<Image
-					source={require('@/assets/imgs/pushover.png')}
-					style={{ width: 100, height: 100 }}
+					source={require('@/assets/imgs/logo.png')}
+					style={{ width: 2958 / 10, height: 1024 / 10 }}
 				/>
 			</View>
 			<View style={{ flex: 1, gap: 12, paddingHorizontal: 28 }}>
 				<View style={{ marginBottom: 24 }}>
 					<PText size="2xl" weight="semibold">
-						Pushify - notifications with ease
+						Simple Push Notifications
 					</PText>
-					<PText>
+					<PText color={Colors.gray}>
 						To get started, you need to setup this device to receive
 						notifications.
 					</PText>
 				</View>
 				<PButton
+					type="dark"
 					trailingContent={
 						<Ionicons name="arrow-forward" size={24} />
 					}

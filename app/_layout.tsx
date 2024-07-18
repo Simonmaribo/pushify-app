@@ -20,6 +20,7 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import * as Notifications from 'expo-notifications'
 import NotificationListener from '@/components/NotificationListener'
+import { StatusBar } from 'expo-status-bar'
 
 SplashScreen.preventAutoHideAsync()
 const queryClient = new QueryClient({
@@ -83,6 +84,7 @@ export default function RootLayout() {
 	return (
 		<GestureHandlerRootView>
 			<NotificationListener />
+			<StatusBar style="dark" />
 			<QueryClientProvider client={queryClient}>
 				<SessionProvider>
 					<Stack>
