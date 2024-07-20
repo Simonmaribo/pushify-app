@@ -35,7 +35,7 @@ export default function MessageRow({ message }: { message: Message }) {
 					weight="semibold"
 					/*numberOfLines={2}*/ ellipsizeMode="tail"
 				>
-					{message.title} and this has been very very
+					{message.title}
 				</PText>
 				<PText /*numberOfLines={5}*/ ellipsizeMode="tail">
 					{message.message}
