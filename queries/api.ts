@@ -6,7 +6,7 @@ interface AxiosClient extends AxiosInstance {
 	setToken: (token: string) => void
 	getAuthHeader: () => string | null
 	removeToken: () => void
-	refreshToken: (pushToken?: string | null) => Promise<void>
+	refreshToken: (uniqueDeviceId?: string | null) => Promise<void>
 }
 
 const client = axios.create({
@@ -30,11 +30,17 @@ client.removeToken = () => {
 	delete client.defaults.headers['Authorization']
 }
 
-client.refreshToken = async (pushToken) => {
+client.refreshToken = async (uniqueDeviceId) => {
 	try {
-		if (!pushToken) pushToken = await getPushToken()
+		let pushToken = null
+		try {
+			pushToken = await getPushToken()
+		} catch (error) {
+			console.log('Error getting push token', error)
+		}
 		const response = await client.post('/device/auth/refresh', {
 			pushToken,
+			uniqueDeviceId,
 		})
 		const token = response.data.token
 		console.log('Token refreshed', token)

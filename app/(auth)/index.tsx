@@ -5,25 +5,19 @@ import PText from '@/components/elements/PText'
 import PButton from '@/components/elements/PButton'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
 
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
-import Constants from 'expo-constants'
 import { getPushToken } from '@/helpers/push-token'
 import client from '@/queries/api'
 import getDeviceType from '@/helpers/device-type'
 import { useSession } from '@/contexts/SessionContext'
-
-function handleRegistrationError(errorMessage: string) {
-	alert(errorMessage)
-	throw new Error(errorMessage)
-}
+import DeviceInfo from 'react-native-device-info'
 
 export default function SetupPage() {
 	const router = useRouter()
 
-	const { setToken } = useSession()
+	const { setToken, setPushToken } = useSession()
 
 	async function askForDeviceName() {
 		if (Platform.OS === 'ios') {
@@ -56,10 +50,8 @@ export default function SetupPage() {
 				await Notifications.getPermissionsAsync()
 
 			if (existingStatus === 'denied') {
-				handleRegistrationError(
-					'Please enable Push Notifications in Settings!'
-				)
-				return
+				alert('Please enable Push Notifications in Settings!')
+				return null
 			}
 
 			let finalStatus: Notifications.PermissionStatus = existingStatus
@@ -80,27 +72,27 @@ export default function SetupPage() {
 			}
 
 			if (finalStatus !== 'granted') {
-				handleRegistrationError(
+				alert(
 					'Permission not granted to get push token for push notification!'
 				)
-				return
+				return null
 			}
 			try {
 				const pushToken = getPushToken()
 				return pushToken
 			} catch (error) {
-				handleRegistrationError(`${error}`)
+				alert(`${error}`)
+				return null
 			}
 		} else {
-			handleRegistrationError(
-				'Must use physical device for push notifications'
-			)
+			alert('Must use physical device for push notifications')
+			return null
 		}
 	}
 
 	async function setupDevice(deviceName?: string) {
 		const pushToken = await askForNotificationPermission()
-		if (!pushToken) return handleRegistrationError('Push token not found')
+		const uniqueDeviceId = await DeviceInfo.getUniqueId()
 
 		const deviceInfo = {
 			deviceName: deviceName ?? Device.deviceName ?? 'Unknown Device',
@@ -111,7 +103,8 @@ export default function SetupPage() {
 			deviceModelName: Device.modelName,
 			deviceOsName: Device.osName,
 			deviceOsVersion: Device.osVersion,
-			pushToken: pushToken,
+			pushToken: pushToken || undefined,
+			uniqueDeviceId: uniqueDeviceId,
 		}
 
 		console.log('Device Info:', deviceInfo)
@@ -130,8 +123,9 @@ export default function SetupPage() {
 			return
 		}
 		try {
-			await client.refreshToken(pushToken)
-			setToken(pushToken)
+			await client.refreshToken(uniqueDeviceId)
+			setToken(uniqueDeviceId)
+			setPushToken(pushToken)
 			router.replace('/(tabs)')
 		} catch (error: any) {
 			const errorMessage =

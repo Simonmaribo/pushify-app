@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pushify",
     "slug": "pushify-app",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "pushify",
@@ -20,7 +20,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.gazellateam.pushify"
     },
     "web": {
       "bundler": "metro",

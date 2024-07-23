@@ -4,13 +4,17 @@ import { SplashScreen } from 'expo-router'
 
 type AuthContextType = {
 	setToken: (token: string | null) => void
+	setPushToken: (pushToken: string | null) => void
+	pushToken?: string | null
 	token?: string | null
 	isLoading: boolean
 }
 
 const AuthContext = React.createContext<AuthContextType>({
 	setToken: () => {},
+	setPushToken: () => {},
 	token: null,
+	pushToken: null,
 	isLoading: true,
 })
 
@@ -28,7 +32,11 @@ export function useSession() {
 }
 
 export function SessionProvider(props: React.PropsWithChildren) {
-	const [[isLoading, token], setToken] = useStorageState('token')
+	const [[isTokenLoading, token], setToken] = useStorageState('token')
+	const [[isPushTokenLoading, pushToken], setPushToken] =
+		useStorageState('pushToken')
+
+	const isLoading = isTokenLoading || isPushTokenLoading
 
 	useEffect(() => {
 		if (!isLoading) {
@@ -44,7 +52,9 @@ export function SessionProvider(props: React.PropsWithChildren) {
 		<AuthContext.Provider
 			value={{
 				setToken,
+				setPushToken,
 				token,
+				pushToken,
 				isLoading,
 			}}
 		>

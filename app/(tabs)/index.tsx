@@ -14,7 +14,6 @@ import React, { useState } from 'react'
 import Dialog from 'react-native-dialog'
 import subscribeToChannel from '@/queries/channels/subscribeToChannel'
 import SwipeableChannelRow from '@/components/ChannelList/SwipeableChannelRow'
-import PButton from '@/components/elements/PButton'
 
 export default function HomeScreen() {
 	const [showDialog, setShowDialog] = useState(false)

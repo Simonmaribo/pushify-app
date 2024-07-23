@@ -3,6 +3,7 @@ import { SafeAreaView, Text, View } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import { useSession } from '@/contexts/SessionContext'
 import PText from '@/components/elements/PText'
+import PushTokenButton from '@/components/Settings/PushTokenButton'
 
 export default function Settings() {
 	const { setToken } = useSession()
@@ -22,8 +23,13 @@ export default function Settings() {
 			</View>
 			<View style={{ marginTop: 10 }}>
 				<View
-					style={{ justifyContent: 'center', alignItems: 'center' }}
+					style={{
+						justifyContent: 'center',
+						alignItems: 'center',
+						gap: 12,
+					}}
 				>
+					<PushTokenButton />
 					<PButton
 						label="Reset device"
 						type="dark"
