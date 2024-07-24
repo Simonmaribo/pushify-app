@@ -1,4 +1,4 @@
-import { View, Image, Platform, Alert } from 'react-native'
+import { View, Image, Platform, Alert, ActivityIndicator } from 'react-native'
 import Colors from '@/constants/Colors'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import PText from '@/components/elements/PText'
@@ -12,12 +12,14 @@ import { getPushToken } from '@/helpers/push-token'
 import client from '@/queries/api'
 import getDeviceType from '@/helpers/device-type'
 import { useSession } from '@/contexts/SessionContext'
-import DeviceInfo from 'react-native-device-info'
+import { useState } from 'react'
+import { getDeviceId } from '@/helpers/device-info'
 
 export default function SetupPage() {
 	const router = useRouter()
 
 	const { setToken, setPushToken } = useSession()
+	const [submitting, setSubmitting] = useState(false)
 
 	async function askForDeviceName() {
 		if (Platform.OS === 'ios') {
@@ -91,8 +93,10 @@ export default function SetupPage() {
 	}
 
 	async function setupDevice(deviceName?: string) {
+		if (submitting) return
+		setSubmitting(true)
 		const pushToken = await askForNotificationPermission()
-		const uniqueDeviceId = await DeviceInfo.getUniqueId()
+		const uniqueDeviceId = await getDeviceId()
 
 		const deviceInfo = {
 			deviceName: deviceName ?? Device.deviceName ?? 'Unknown Device',
@@ -120,6 +124,7 @@ export default function SetupPage() {
 				'An unknown error occurred.'
 			console.error(errorMessage)
 			alert(errorMessage)
+			setSubmitting(false)
 			return
 		}
 		try {
@@ -136,12 +141,29 @@ export default function SetupPage() {
 				'An unknown error occurred.'
 			console.error(errorMessage)
 			alert(errorMessage)
+			setSubmitting(false)
 			return
 		}
 	}
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+			{submitting && (
+				<View
+					style={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0, 0, 0, 0.2)',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<ActivityIndicator />
+				</View>
+			)}
 			<View
 				style={{
 					flex: 1,
@@ -160,8 +182,8 @@ export default function SetupPage() {
 						Simple Push Notifications
 					</PText>
 					<PText color={Colors.gray}>
-						To get started, you need to setup this device to receive
-						notifications.
+						Setup the device to get started. Allow Push
+						Notifications for the best experience.
 					</PText>
 				</View>
 				<PButton
@@ -171,6 +193,8 @@ export default function SetupPage() {
 					}
 					label="Setup this device"
 					onPress={askForDeviceName}
+					disabled={submitting}
+					loading={submitting}
 				/>
 			</View>
 		</SafeAreaView>

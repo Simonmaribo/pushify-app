@@ -1,3 +1,4 @@
+import { getDeviceId } from '@/helpers/device-info'
 import { getPushToken } from '@/helpers/push-token'
 import axios, { AxiosInstance } from 'axios'
 import * as SecureStore from 'expo-secure-store'
@@ -38,6 +39,10 @@ client.refreshToken = async (uniqueDeviceId) => {
 		} catch (error) {
 			console.log('Error getting push token', error)
 		}
+		if (!uniqueDeviceId) {
+			uniqueDeviceId = await getDeviceId()
+		}
+
 		const response = await client.post('/device/auth/refresh', {
 			pushToken,
 			uniqueDeviceId,
