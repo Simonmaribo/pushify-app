@@ -10,7 +10,7 @@ import { useSession } from '@/contexts/SessionContext'
 export default function PushTokenButton() {
 	const [submitting, setSubmitting] = useState(false)
 
-	const { pushToken } = useSession()
+	const { pushToken, setPushToken } = useSession()
 
 	async function updatePushToken() {
 		if (submitting) return
@@ -28,6 +28,7 @@ export default function PushTokenButton() {
 			.then(() => {
 				alert('Push token added!')
 				setSubmitting(false)
+				setPushToken(pushToken)
 			})
 			.catch((error) => {
 				alert(`Error adding push token: ${error}`)
@@ -46,35 +47,56 @@ export default function PushTokenButton() {
 		}
 
 		if (Device.isDevice) {
-			const { status: existingStatus } =
+			const { status: existingStatus, ios } =
 				await Notifications.getPermissionsAsync()
 
-			if (existingStatus === 'denied') {
-				alert('Please enable Push Notifications in Settings!')
+			let granted =
+				existingStatus === 'granted' ||
+				ios?.status == Notifications.IosAuthorizationStatus.AUTHORIZED
+
+			if (
+				Platform.OS == 'ios' &&
+				ios &&
+				ios.status == Notifications.IosAuthorizationStatus.DENIED
+			) {
+				alert('Please enable notifications in your settings')
+				return null
+			} else if (Platform.OS !== 'ios' && existingStatus === 'denied') {
+				alert('Please enable notifications in your settings')
 				return null
 			}
 
 			let finalStatus: Notifications.PermissionStatus = existingStatus
-			if (existingStatus !== 'granted') {
-				const { status } = await Notifications.requestPermissionsAsync({
-					ios: {
-						allowAlert: true,
-						allowBadge: true,
-						allowSound: true,
-						allowDisplayInCarPlay: true,
-						allowCriticalAlerts: true,
-						provideAppNotificationSettings: true,
-						allowProvisional: true,
-						allowAnnouncements: true,
-					},
-				})
+			let finalIosStatus:
+				| Notifications.IosAuthorizationStatus
+				| undefined = ios?.status
+			if (!granted) {
+				const { status, ios } =
+					await Notifications.requestPermissionsAsync({
+						ios: {
+							allowAlert: true,
+							allowBadge: true,
+							allowSound: true,
+							allowDisplayInCarPlay: true,
+							allowCriticalAlerts: true,
+							provideAppNotificationSettings: true,
+							//allowProvisional: true,
+							allowAnnouncements: true,
+						},
+					})
 				finalStatus = status
+				finalIosStatus = ios?.status
 			}
 
-			if (finalStatus !== 'granted') {
-				alert(
-					'Permission not granted to get push token for push notification!'
-				)
+			if (
+				Platform.OS == 'ios' &&
+				finalIosStatus !=
+					Notifications.IosAuthorizationStatus.AUTHORIZED
+			) {
+				alert('Please enable notifications in your settings')
+				return null
+			} else if (Platform.OS !== 'ios' && finalStatus !== 'granted') {
+				alert('Please enable notifications in your settings')
 				return null
 			}
 			try {

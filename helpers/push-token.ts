@@ -10,6 +10,9 @@ export async function getPushToken() {
 			return reject('Project ID not found. Please try again.')
 		}
 		try {
+			setTimeout(() => {
+				reject('Timeout getting push token')
+			}, 5000)
 			const pushTokenString = (
 				await Notifications.getExpoPushTokenAsync({
 					projectId,

@@ -23,15 +23,19 @@ export default function SetupPage() {
 
 	async function askForDeviceName() {
 		if (Platform.OS === 'ios') {
-			Alert.prompt('Device Name', 'Enter a name for this device', [
-				{
-					text: 'Continue',
-					style: 'default',
-					onPress: (value) => {
-						setupDevice(value)
+			Alert.prompt(
+				'Device Name (Optional)',
+				'Enter a name for this device',
+				[
+					{
+						text: 'Continue',
+						style: 'default',
+						onPress: (value) => {
+							setupDevice(value)
+						},
 					},
-				},
-			])
+				]
+			)
 		} else {
 			setupDevice()
 		}
@@ -48,35 +52,59 @@ export default function SetupPage() {
 		}
 
 		if (Device.isDevice) {
-			const { status: existingStatus } =
+			const { status: existingStatus, ios } =
 				await Notifications.getPermissionsAsync()
 
-			if (existingStatus === 'denied') {
-				alert('Please enable Push Notifications in Settings!')
+			if (
+				Platform.OS == 'ios' &&
+				ios &&
+				ios.status == Notifications.IosAuthorizationStatus.DENIED
+			) {
+				console.log('1')
+				return null
+			} else if (Platform.OS !== 'ios' && existingStatus === 'denied') {
+				console.log('2')
 				return null
 			}
 
+			let granted =
+				existingStatus === 'granted' ||
+				ios?.status == Notifications.IosAuthorizationStatus.AUTHORIZED
+
 			let finalStatus: Notifications.PermissionStatus = existingStatus
-			if (existingStatus !== 'granted') {
-				const { status } = await Notifications.requestPermissionsAsync({
-					ios: {
-						allowAlert: true,
-						allowBadge: true,
-						allowSound: true,
-						allowDisplayInCarPlay: true,
-						allowCriticalAlerts: true,
-						provideAppNotificationSettings: true,
-						allowProvisional: true,
-						allowAnnouncements: true,
-					},
-				})
+			let finalIosStatus:
+				| Notifications.IosAuthorizationStatus
+				| undefined = ios?.status
+			if (!granted) {
+				console.log('3')
+				const { status, ios } =
+					await Notifications.requestPermissionsAsync({
+						ios: {
+							allowAlert: true,
+							allowBadge: true,
+							allowSound: true,
+							allowDisplayInCarPlay: true,
+							allowCriticalAlerts: true,
+							provideAppNotificationSettings: true,
+							//allowProvisional: true,
+							allowAnnouncements: true,
+						},
+					})
 				finalStatus = status
+				finalIosStatus = ios?.status
 			}
 
-			if (finalStatus !== 'granted') {
-				alert(
-					'Permission not granted to get push token for push notification!'
-				)
+			console.log('FINAL STATUS', finalIosStatus)
+
+			if (
+				Platform.OS == 'ios' &&
+				finalIosStatus !=
+					Notifications.IosAuthorizationStatus.AUTHORIZED
+			) {
+				console.log('4')
+				return null
+			} else if (Platform.OS !== 'ios' && finalStatus !== 'granted') {
+				console.log('5')
 				return null
 			}
 			try {
@@ -84,10 +112,12 @@ export default function SetupPage() {
 				return pushToken
 			} catch (error) {
 				alert(`${error}`)
+				console.log('6')
 				return null
 			}
 		} else {
 			alert('Must use physical device for push notifications')
+			console.log('7')
 			return null
 		}
 	}
@@ -96,6 +126,7 @@ export default function SetupPage() {
 		if (submitting) return
 		setSubmitting(true)
 		const pushToken = await askForNotificationPermission()
+		console.log('Push Token:', pushToken)
 		const uniqueDeviceId = await getDeviceId()
 
 		const deviceInfo = {
